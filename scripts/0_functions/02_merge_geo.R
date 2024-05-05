@@ -1,3 +1,4 @@
+# Merge geographic shapefiles from the tigris package to data frames 
 
 merge_state_geo <- function(df, year, crs_code, df_geoid_col) {
   state_geoids <- unique(df[[df_geoid_col]])

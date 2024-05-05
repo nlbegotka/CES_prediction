@@ -1,3 +1,5 @@
+# Bin data and create column with labels
+
 add_bins <- function(df, col, bin_n, round_n=0) {
   # create break points
   min_val <- min(df[[col]])

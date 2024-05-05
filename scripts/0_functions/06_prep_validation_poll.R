@@ -1,3 +1,5 @@
+# Write function to aggregate poll data to validate output 
+
 prep_validation_poll <- function(poll, geoid_col, geoname_col, response_cols) {
   
   geoid_col <- sym(geoid_col)   # convert strings to symbols to use dplyr operations

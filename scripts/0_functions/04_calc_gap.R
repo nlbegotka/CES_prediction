@@ -1,4 +1,4 @@
-# Write function to calculate gap between two columns 
+# Write function to calculate difference between two columns and scale
 
 calc_gap <- function(metric_col, worry_col, gap_range_vec) {
   

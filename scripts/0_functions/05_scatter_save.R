@@ -1,5 +1,5 @@
-# Scatter plot functions for hazards project
-# These scatter plot functions add a regression line and R-squared value to the plot 
+# Write functions to output ungrouped and grouped scatterplots 
+# These functions add a regression line and R-squared value to the plot 
 
 scatter_save <- function(df, x_col, y_col, title, xlab, ylab, output_file) {
   
