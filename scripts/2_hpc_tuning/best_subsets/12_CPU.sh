@@ -12,5 +12,5 @@ module purge
 module load R/4.3.0-foss-2020b
 # module list -- lists all loaded modules 
 export OMP_NUM_THREADS=1
-Rscript bestsub_tune_hpc.R
+Rscript bestsub_tune.R
 

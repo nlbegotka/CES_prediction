@@ -82,7 +82,7 @@ run_cv <- function(df, dv, model_formula, n_folds, seed) {
 
 # Create all combinations of predictors
 rand_effect_vars <- "state_fips"
-features <- names(poll_county_processed)[!names(poll_county_processed) %in% c(dv, rand_effect_vars)]
+features <- names(poll_processed)[!names(poll_processed) %in% c(dv, rand_effect_vars)]
 
 # manually select which features to test in best subsets 
 bestsub_features <- c("age", "gender", "union_member", "cdc_svi_comp","college_degree", 

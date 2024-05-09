@@ -27,7 +27,7 @@ load(file.path(input_path, "poll_train.rda")) # data
 # 2.1. Split data into train and test (for tuning only)
 #-------------------------------------------------------------------------------
 set.seed(42)
-split_county <- initial_split(poll_county_train, prop = 0.8, strata = "state_fips")
+split_county <- initial_split(poll_train, prop = 0.8, strata = "state_fips")
 poll_train_tune <- training(split_county)
 poll_test_tune  <- testing(split_county)
 

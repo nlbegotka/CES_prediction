@@ -28,7 +28,7 @@ load(file.path(input_path, "poll_train.rda")) # data
 dv <- "climate_change_worry"
 model_formula <- as.formula(paste0(dv, " ~ ."))
 
-recipe_base <- poll_county_train %>%
+recipe_base <- poll_train %>%
   recipe(model_formula) %>% 
   step_normalize(all_numeric_predictors()) 
 
