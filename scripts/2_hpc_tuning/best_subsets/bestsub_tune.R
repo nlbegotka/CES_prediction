@@ -119,7 +119,7 @@ duration <- end_time - start_time
 runtimemin <- round(duration[3]/60, 1)
 paste("Run time county:", runtimemin, "minutes on 10 folds")
 
-# Find best feautres and associatd AUC 
+# Find best features and associated AUC 
 best_auc_idx <- which.min(auc_values)
 best_features <- all_combinations[best_auc_idx] %>% unlist()
 best_auc <- auc_values[best_auc_idx]

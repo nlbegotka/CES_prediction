@@ -107,7 +107,7 @@ auc_values <- foreach(n_comp = num_components, .combine = "c") %dopar% {
                                      paste(pca_vars, collapse="+")))
   
   # Run cross-validation for this n_comp returning auc value
-  run_cv(df = poll_county_pca, dv = "dv_heat", 
+  run_cv(df = poll_county_pca, dv = "climate_change_worry", 
          model_formula = model_formula, seed = 42, n_folds = n_folds)
   
 }
