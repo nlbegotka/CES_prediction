@@ -93,7 +93,7 @@ start_time <- proc.time()
 auc_values <- foreach(n_comp = num_components, .combine = "c") %dopar% {
   
   pca_recipe <- poll_processed %>%
-    recipe(model_formula_pca) %>% 
+    recipe(model_formula) %>% 
     step_pca(all_numeric_predictors(), num_comp = n_comp)
   
   poll_county_pca <- pca_recipe %>%
