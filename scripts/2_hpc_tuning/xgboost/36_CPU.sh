@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1 --nodes=1
 #SBATCH --cpus-per-task=36
 #SBATCH --mem-per-cpu=5G
-#SBATCH --time=6:00:00
+#SBATCH --time=8:00:00
 #SBATCH --mail-type=ALL
 
 # Run R code
