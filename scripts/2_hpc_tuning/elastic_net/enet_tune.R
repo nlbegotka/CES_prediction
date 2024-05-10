@@ -155,6 +155,7 @@ print(conf_mat)
 up_path <- paste(rep("..", 3), collapse = "/") # dynamic
 outpath <- "temp/tuning/"
 output_path <- file.path(up_path, outpath)
+dir.create(output_path, recursive = TRUE)
 
 save(tuning_df, enet_tune_best, train_auc, test_auc, predictor_importance, metrics, 
      conf_mat, file=paste0(output_path, "enet_tuning.rda"))

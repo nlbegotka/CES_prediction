@@ -150,6 +150,7 @@ print(rf_tune_best)
 up_path <- paste(rep("..", 3), collapse = "/")
 output_path <- "temp/tuning/"
 output_path <- file.path(up_path, output_path)
+dir.create(output_path, recursive = TRUE)
 
 # Save everything
 save(tuning_df, rf_tune_best, train_auc, test_auc, predictor_importance, metrics, 

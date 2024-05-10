@@ -71,7 +71,7 @@ xgb_wflow <- workflow() %>%
 #-------------------------------------------------------------------------------
 # 2.5. Specify a resampling strategy for model tuning -- cross-validation
 #-------------------------------------------------------------------------------
-cv_obj <- vfold_cv(poll_train_tune, v = 10, strata = "state_fips", repeats=10)
+cv_obj <- vfold_cv(poll_train_tune, v = 10, strata = "climate_change_worry", repeats=10)
 
 #-------------------------------------------------------------------------------
 # 2.6. Create tuning grid
@@ -161,6 +161,7 @@ print(conf_mat)
 up_path <- paste(rep("..", 3), collapse = "/")
 output_path <- "temp/tuning/"
 output_path <- file.path(up_path, output_path)
+dir.create(output_path, recursive = TRUE)
 
 # Save output
 save(tuning_df, xgb_tune_best, train_auc, test_auc, predictor_importance, metrics, 

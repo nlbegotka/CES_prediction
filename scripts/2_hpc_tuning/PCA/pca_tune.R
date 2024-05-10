@@ -126,6 +126,7 @@ print(auc_values)
 up_path <- paste(rep("..", 3), collapse = "/")
 output_path <- "temp/tuning/"
 output_path <- file.path(up_path, output_path)
+dir.create(output_path, recursive = TRUE)
 
 # Save output
 save(auc_values, file=paste0(output_path, "pca_tuning.rda"))

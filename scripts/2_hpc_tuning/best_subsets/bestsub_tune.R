@@ -107,7 +107,7 @@ auc_values <- foreach(features = all_combinations, .combine = "c") %dopar% {
   model_formula <- as.formula(paste0(dv, " ~ (1|state_fips) + ",
                                      paste(features, collapse="+")))
   
-  run_cv(df = poll_train, dv = "climate_change_worry", 
+  run_cv(df = poll_processed, dv = "climate_change_worry", 
          model_formula = model_formula, seed = 42, n_folds = 10)
   
 }
@@ -132,6 +132,7 @@ print(best_auc)
 #-------------------------------------------------------------------------------
 up_path <- paste(rep("..", 3), collapse = "/") # dynamic
 output_path <- file.path(up_path, "temp/tuning/")
+dir.create(output_path, recursive = TRUE)
 save(best_features, best_auc, file=paste0(output_path, "bestsub_tuning.rda"))
 
 
