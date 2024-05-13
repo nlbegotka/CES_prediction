@@ -71,7 +71,7 @@ xgb_wflow <- workflow() %>%
 #-------------------------------------------------------------------------------
 # 2.5. Specify a resampling strategy for model tuning -- cross-validation
 #-------------------------------------------------------------------------------
-cv_obj <- vfold_cv(poll_train_tune, v = 10, strata = "climate_change_worry", repeats=10)
+cv_obj <- vfold_cv(poll_train_tune, v = 5, strata = "climate_change_worry")
 
 #-------------------------------------------------------------------------------
 # 2.6. Create tuning grid
@@ -90,7 +90,7 @@ xgb_grid_rand <- grid_latin_hypercube(
   # loss_reduction(c(-10, 1.5)),
   sample_size = sample_prop(c(0.2, 0.9)), # sample_prop allows us to set range 
   stop_iter(c(5, 25)),
-  size = 500
+  size = 250
 )
 
 
