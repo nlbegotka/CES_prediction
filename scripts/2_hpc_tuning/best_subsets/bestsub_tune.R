@@ -85,9 +85,8 @@ rand_effect_vars <- "state_fips"
 features <- names(poll_processed)[!names(poll_processed) %in% c(dv, rand_effect_vars)]
 
 # manually select which features to test in best subsets 
-bestsub_features <- c("age", "gender", "union_member", "cdc_svi_comp","college_degree", 
-                      "white_non_hisp", "pol_identity", "citizen", "rural_resident", 
-                      "evangelical", "military_service", "heterosexual")
+bestsub_features <- c("age", "gender", "union_member", "cdc_svi_comp", "college_degree", 
+                      "pol_identity", "rural_resident", "evangelical", "military_service", "heterosexual")
 
 n <- length(bestsub_features)
 all_combinations <- lapply(1:n, function(x) combn(bestsub_features, x, simplify=FALSE))
