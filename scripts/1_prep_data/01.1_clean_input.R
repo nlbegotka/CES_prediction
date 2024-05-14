@@ -201,5 +201,5 @@ sapply(poll_clean, class)
 #-------------------------------------------------------------------------------
 # 4. Save 
 #-------------------------------------------------------------------------------
-write.csv(poll_clean, "temp/poll_clean.csv")
+# write.csv(poll_clean, "temp/poll_clean.csv")
 save(poll_clean, file = "temp/poll_clean.rda")

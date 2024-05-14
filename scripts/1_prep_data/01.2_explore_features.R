@@ -25,7 +25,7 @@ load("temp/poll_clean.rda")
 source("scripts/0_functions/00_create_directory.R")
 
 # Crosswalk 
-state_xwalk <- read.csv("temp/state_xwalk.csv")
+state_xwalk <- read.csv("input/state_xwalk.csv")
 
 #-------------------------------------------------------------------------------
 # 1. Explore dv 

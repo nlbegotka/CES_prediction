@@ -1,6 +1,5 @@
-# Ensemble various models to improve performance with averaging and EBMA 
-# Load ypccc_hazards.Rproj!
-# Last updated: 4/10/2024 by NLB 
+# Test individual model performance and ensemble model performance
+# Last updated: 5/11/2024 by NB 
 
 #-------------------------------------------------------------------------------
 # 0. Load objects
@@ -15,10 +14,14 @@ library(glmnet)
 library(ranger)
 library(pROC) 
 library(yardstick)
+library(Metrics)
 
 # Data
 load("temp/poll_train.rda")
 load("temp/poll_test.rda")
+
+# Functions
+source("scripts/0_functions/00_create_directory.R")
 
 #-------------------------------------------------------------------------------
 # 1. Create recipes to pre-process data for models 
@@ -33,11 +36,13 @@ recipe_formula <- as.formula(paste0(dv, " ~ ."))
 xgb_recipe_train <- poll_train %>%
   recipe(recipe_formula) %>% 
   step_dummy(all_nominal_predictors()) %>% # dummy encode 
+  step_select(-evangelical_Other) %>% # remove zero-variance
   step_normalize(all_numeric_predictors()) # normalize 
 
 xgb_recipe_test <- poll_test %>%
   recipe(recipe_formula) %>% 
   step_dummy(all_nominal_predictors()) %>% 
+  step_select(-evangelical_Other) %>% # remove zero-variance
   step_normalize(all_numeric_predictors()) 
 
 
@@ -56,12 +61,14 @@ rf_recipe_test <- poll_test %>%
 enet_recipe_train <- poll_train %>%
   recipe(recipe_formula) %>% 
   step_dummy(all_nominal_predictors()) %>% 
+  step_select(-evangelical_Other) %>% # remove zero-variance
   step_normalize(all_numeric())  
 
 
 enet_recipe_test <- poll_test %>%
   recipe(recipe_formula) %>% 
   step_dummy(all_nominal_predictors()) %>% 
+  step_select(-evangelical_Other) %>% # remove zero-variance
   step_normalize(all_numeric())  
 
 
@@ -70,12 +77,12 @@ enet_recipe_test <- poll_test %>%
 pca_recipe_train <- poll_train %>%
   recipe(recipe_formula) %>% 
   step_normalize(all_numeric_predictors()) %>%  
-  step_pca(all_numeric_predictors(), num_comp = 15) # convert to pca components 
+  step_pca(all_numeric_predictors(), num_comp = 4) # convert to pca components 
 
 pca_recipe_test <- poll_test %>%
   recipe(recipe_formula) %>% 
   step_normalize(all_numeric_predictors()) %>%
-  step_pca(all_numeric_predictors(), num_comp = 15) # convert to pca components 
+  step_pca(all_numeric_predictors(), num_comp = 4) # convert to pca components 
 
 
 ## 1.5. Best subsets recipe ------------------------------------------------
@@ -147,7 +154,7 @@ bestsub_test <- bestsub_recipe_test %>%
 #-------------------------------------------------------------------------------
 # 3.0. Create lists to store model performance on test set ---------------------
 aucs <- list()
-f1_scores <- list()
+log_losses <- list()
 
 # 3.1. XGBoost ----------------------------------------------------------------
 # Load optimal hyperparameters from tuning output
@@ -186,12 +193,12 @@ names(xgb_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess model performance on test set 
 (xgb_auc <- roc(xgb_test_pred_all$truth, xgb_test_pred_all$pred_prob) %>% auc())
-(xgb_f1 <- xgb_test_pred_all %>% f_meas(truth, pred_class))
+(xgb_logloss <- logLoss(as.numeric(xgb_test_pred_all$truth), xgb_test_pred_all$pred_prob))
+
 
 # Add results to list 
 aucs$xgboost <- xgb_auc
-f1_scores$xgboost <- xgb_f1
-
+log_losses$xgboost <- xgb_logloss
 
 # 3.2. Random forest -----------------------------------------------------------
 # Follow same steps as in XGBoost
@@ -224,12 +231,11 @@ names(rf_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess model performance on test set 
 (rf_auc <- roc(rf_test_pred_all$truth, rf_test_pred_all$pred_prob) %>% auc())
-(rf_f1 <- rf_test_pred_all %>% f_meas(truth, pred_class))
+(rf_logloss <- logLoss(as.numeric(rf_test_pred_all$truth), rf_test_pred_all$pred_prob))
 
 # Add results to list 
 aucs$randforest <- rf_auc
-f1_scores$randforest <- rf_f1
-
+log_losses$randforest <- rf_logloss
 
 # 3.3. Elastic net -------------------------------------------------------------
 load("temp/tuning/enet_tuning.rda")
@@ -260,12 +266,11 @@ names(enet_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess model peenetormance on test set 
 (enet_auc <- roc(enet_test_pred_all$truth, enet_test_pred_all$pred_prob) %>% auc())
-(enet_f1 <- enet_test_pred_all %>% f_meas(truth, pred_class))
+(enet_logloss <- logLoss(as.numeric(enet_test_pred_all$truth), enet_test_pred_all$pred_prob))
 
 # Add results to list 
 aucs$elasticnet <- enet_auc
-f1_scores$elasticnet <- enet_f1
-
+log_losses$elasticnet <- enet_logloss
 
 # 3.4. PCA ---------------------------------------------------------------------
 # PCA model with four components performs better than one component which was 
@@ -275,7 +280,7 @@ load("temp/tuning/pca_tuning.rda")
 
 # Define model formula -- uses mixed model framework unlike XGB, rf, and enet
 dv <- "climate_change_worry"
-best_components <- c("PC01", "PC02", "PC03", "PC04")
+best_components <- c("PC1", "PC2", "PC3", "PC4")
 model_formula <- as.formula(paste0(dv, " ~ (1|state_fips) + ",
                                    paste(best_components, collapse="+")))
 
@@ -296,12 +301,11 @@ names(pca_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess model performance on test set 
 (pca_auc <- roc(pca_test_pred_all$truth, pca_test_pred_all$pred_prob) %>% auc())
-(pca_f1 <- pca_test_pred_all %>% f_meas(truth, pred_class))
+(pca_logloss <- logLoss(as.numeric(pca_test_pred_all$truth), pca_test_pred_all$pred_prob))
 
 # Add results to list 
 aucs$PCA <- pca_auc
-f1_scores$PCA <- pca_f1
-
+log_losses$PCA <- pca_logloss
 
 
 # 3.5. Best subsets ------------------------------------------------------------
@@ -311,7 +315,7 @@ load("temp/tuning/bestsub_tuning.rda")
 # Define model formula -- best_predictors is loaded above 
 dv <- "climate_change_worry"
 model_formula <- as.formula(paste0(dv, " ~ (1|state_fips) + ",
-                                   paste(best_predictors, collapse="+")))
+                                   paste(best_features, collapse="+")))
 
 bestsub_fit <- glmer(model_formula, data = bestsub_train, family = binomial(link = "logit"))
 
@@ -330,11 +334,11 @@ names(bestsub_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess model performance on test set 
 (bestsub_auc <- roc(bestsub_test_pred_all$truth, bestsub_test_pred_all$pred_prob) %>% auc())
-(bestsub_f1 <- bestsub_test_pred_all %>% f_meas(truth, pred_class))
+(bestsub_logloss <- logLoss(as.numeric(bestsub_test_pred_all$truth), bestsub_test_pred_all$pred_prob))
 
 # Add results to list 
 aucs$bestsub <- bestsub_auc
-f1_scores$bestsub <- bestsub_f1
+log_losses$bestsub <- bestsub_logloss
 
 #-------------------------------------------------------------------------------
 # 4. Manually ensemble 
@@ -350,15 +354,14 @@ names(avg_test_pred_all) <- c("pred_class", "pred_prob", "truth")
 
 # Assess avg model performance 
 (avg_auc <- roc(avg_test_pred_all$truth, avg_test_pred_all$pred_prob) %>% auc())
-(avg_f1 <- avg_test_pred_all %>% f_meas(truth, pred_class))
+(avg_logloss <- logLoss(as.numeric(avg_test_pred_all$truth), avg_test_pred_all$pred_prob))
 
 # Add results to list -- AUC is slightly worse than just XGBoost model 
 aucs$average <- avg_auc
-f1_scores$average <- avg_f1
+log_losses$average <- avg_logloss
 
 
-
-# 4.2. Constructing weighted averaging probabilities 
+# 4.2. Constructing weighted averaging probabilities based on auc performance
 auc_scores_vec  <- c(aucs$xgboost, aucs$randforest, aucs$elasticnet, aucs$PCA, aucs$bestsub)
 ranked_indices <- order(auc_scores_vec, decreasing = TRUE)
 weights <- 1 / (ranked_indices + 1)
@@ -379,15 +382,13 @@ names(avg_test_pred_weighted) <- c("pred_class", "pred_prob", "truth")
 
 # Assess avg model performance 
 (avg_auc_weighted <- roc(avg_test_pred_weighted$truth, avg_test_pred_weighted$pred_prob) %>% auc())
-(avg_f1_weighted <- avg_test_pred_weighted %>% f_meas(truth, pred_class))
 
-# Add results to list -- AUC is slightly worse than just XGBoost model 
+# Add results to list -- AUC is better than all other models 
 aucs$average_weighted <- avg_auc_weighted
-f1_scores$average_weighted <- avg_f1_weighted
 
 
 
-# 4.3. Averaging weighted top 3 probabilities 
+# 4.3. Averaging weighted top 3 probabilities based on auc performance
 auc_scores_vec  <- c(aucs$xgboost, aucs$randforest, aucs$elasticnet)
 ranked_indices <- order(auc_scores_vec, decreasing = TRUE)
 
@@ -407,37 +408,17 @@ names(avg_test_pred_weighted_top3) <- c("pred_class", "pred_prob", "truth")
 
 # Assess avg model performance 
 (avg_auc_weighted_top3 <- roc(avg_test_pred_weighted_top3$truth, avg_test_pred_weighted_top3$pred_prob) %>% auc())
-(avg_f1_weighted_top3 <- avg_test_pred_weighted_top3 %>% f_meas(truth, pred_class))
 
-# Add results to list -- AUC is slightly worse than just XGBoost model 
+# Add results to list -- AUC is the same 
 aucs$average_weighted_top3 <- avg_auc_weighted_top3
-f1_scores$average_weighted_top3 <- avg_f1_weighted_top3
-
-
-# 4.4. Class voting -- only applies to F1 score --------------------------------
-class_voting_df <- data.frame(xgb_test_pred_all$pred_class, rf_test_pred_all$pred_class, 
-                              enet_test_pred_all$pred_class, pca_test_pred_all$pred_class, 
-                              bestsub_test_pred_all$pred_class)
-names(class_voting_df) <- c("xgboost", "randforest", "elasticnet", "PCA", "bestsub")
-
-class_voting_df$majority <- apply(class_voting_df, 1, function(row) {
-  table_row <- table(row)
-  mode_value <- as.numeric(names(table_row)[which.max(table_row)])
-  return(mode_value)
-})
-
-class_voting_df <- class_voting_df %>% 
-  mutate(majority = as.factor(majority), 
-         truth = as.factor(bestsub_test$climate_change_worry))
-
-(voting_f1 <- class_voting_df %>% f_meas(truth, majority))
-f1_scores$voting <- voting_f1
 
 
 #-------------------------------------------------------------------------------
 # 5. Save AUCs to evaluate later
 #-------------------------------------------------------------------------------
-save(aucs, file= "temp/aucs/auc_assessment.rda")
+outpath <- "output/3_aucs"
+create_directory(outpath)
+save(aucs, file=file.path(outpath, "auc_assessment.rda"))
 
 
 
