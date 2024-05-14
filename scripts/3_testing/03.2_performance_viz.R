@@ -18,7 +18,6 @@ source("scripts/0_functions/00_create_directory.R")
 #-------------------------------------------------------------------------------
 # 1. Plot
 #-------------------------------------------------------------------------------
-
 # Create df 
 model_names <- names(aucs)
 auc_values <- c(0.8097, 0.806, 0.7998, 0.5107, 0.5627, 0.8081, 0.8102, 0.81)
@@ -30,9 +29,10 @@ auc_df$model <- fct_reorder(auc_df$model, auc_df$auc, .desc = TRUE)
 ggplot(auc_df, aes(x = model, y = auc)) +
   geom_bar(stat = "identity", fill = "#B03A2E") +
   geom_text(aes(label = round(auc, 4)), vjust = -0.5) +  # Add labels above bars
-  labs(title = "AUC Values for Different Models",
+  labs(title = "AUC values across models",
        x = "Model", y = "AUC") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
 
-# Save
+
+
 
