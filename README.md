@@ -14,6 +14,8 @@ All files are organized into 3 folders: **scripts, temp, and output**
 The input data includes state and county-level poll and sociodemographic data frames: poll_county, df_county, poll_state, and df_state. These data frames are located in `ypccc_hazards/downscale/all/output` and are created by scripts in `ypccc_hazards/downscale/all`
 which creates the input data for all hazards models. 
 
+![Example Image](background/model_flowchart.png)
+
 ### Scripts
 Contains all scripts used for the project.
 
