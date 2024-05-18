@@ -2,3 +2,4 @@
 **/.DS_Store
 **/slurm-*
 .Rproj.user
+scripts/.ipynb_checkpoints/
